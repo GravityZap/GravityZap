@@ -1,0 +1,45 @@
+name: Generate GitHub Metrics SVG
+
+on:
+  schedule:
+    - cron: "30 2 * * *"
+  workflow_dispatch:
+
+jobs:
+  metrics:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install requests svgwrite
+
+      - name: Generate metrics SVG
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          source .venv/bin/activate
+          python generate_metrics_svg.py
+
+      - name: Commit SVG
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email github-actions[bot]@users.noreply.github.com
+
+          if [[ `git status --porcelain` ]]; then
+            git add svg/github-metrics.svg
+            git commit -m "chore: update github metrics svg"
+            git push
+          else
+            echo "No changes"
+          fi
