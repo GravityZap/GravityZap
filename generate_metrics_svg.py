@@ -92,17 +92,21 @@ accent = dwg.defs.add(dwg.linearGradient(id="accent", start=(0, 0), end=(1, 0)))
 accent.add_stop_color(0, "#60a5fa")
 accent.add_stop_color(1, "#a78bfa")
 
+# --- glow ---
 glow = dwg.defs.add(dwg.filter(id="glow", x="-20%", y="-20%", width="140%", height="140%"))
 glow.feGaussianBlur(stdDeviation=8, result="blur")
 glow.feMerge(["blur", "SourceGraphic"])
 
+# --- soft shadow (compatible replacement for feDropShadow) ---
 soft_shadow = dwg.defs.add(dwg.filter(id="softShadow", x="-20%", y="-20%", width="140%", height="140%"))
-soft_shadow.feDropShadow(dx=0, dy=8, stdDeviation=12, flood_color="#000", flood_opacity=0.35)
+soft_shadow.feGaussianBlur(in_="SourceAlpha", stdDeviation=10, result="blur")
+soft_shadow.feOffset(dx=0, dy=6, result="offsetBlur")
+soft_shadow.feMerge(["offsetBlur", "SourceGraphic"])
 
 # ===== BACKGROUND =====
 
 dwg.add(dwg.rect((0, 0), (W, H), rx=26, fill="url(#bg)"))
-dwg.add(dwg.circle((W-120, -40), 180, fill="url(#accent)", opacity=0.08, filter="url(#glow)"))
+dwg.add(dwg.circle((W - 120, -40), 180, fill="url(#accent)", opacity=0.08, filter="url(#glow)"))
 
 # ===== HEADER =====
 
@@ -132,8 +136,8 @@ y = 275
 for lang, size in top_langs:
     w = int((size / max_size) * 520)
     dwg.add(dwg.text(lang, insert=(40, y), fill="#e6edf3", font_size=13))
-    dwg.add(dwg.rect((40, y+10), (560, 12), rx=8, fill="#1f2933"))
-    dwg.add(dwg.rect((40, y+10), (w, 12), rx=8, fill="url(#accent)"))
+    dwg.add(dwg.rect((40, y + 10), (560, 12), rx=8, fill="#1f2933"))
+    dwg.add(dwg.rect((40, y + 10), (w, 12), rx=8, fill="url(#accent)"))
     y += 34
 
 # ===== FOOTER =====
