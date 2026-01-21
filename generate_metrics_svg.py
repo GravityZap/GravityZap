@@ -1,3 +1,9 @@
+import os
+import sys
+import requests
+import svgwrite
+from collections import Counter
+
 # ---------- SVG (PREMIUM STYLE) ----------
 
 os.makedirs("svg", exist_ok=True)
