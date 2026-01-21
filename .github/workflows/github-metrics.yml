@@ -12,34 +12,44 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: "pip"
 
-      - name: Install deps
+      - name: Install dependencies
         run: |
-          python -m venv .venv
-          source .venv/bin/activate
+          python -m pip install --upgrade pip
           pip install requests svgwrite
 
       - name: Generate metrics SVG
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          source .venv/bin/activate
           python generate_metrics_svg.py
 
-      - name: Commit SVG
+      - name: Debug workspace
         run: |
-          git config user.name github-actions[bot]
-          git config user.email github-actions[bot]@users.noreply.github.com
+          echo "📁 Workspace:"
+          ls -lah
+          echo "📁 svg:"
+          ls -lah svg || echo "svg folder missing"
+          git status --short
 
-          if [[ `git status --porcelain` ]]; then
-            git add svg/github-metrics.svg
-            git commit -m "chore: update github metrics svg"
+      - name: Commit SVG if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if [[ -n "$(git status --porcelain svg/)" ]]; then
+            git add svg/*.svg
+            git commit -m "chore: update GitHub metrics SVG"
             git push
+            echo "✅ SVG updated and pushed"
           else
-            echo "No changes"
+            echo "ℹ️ No SVG changes to commit"
           fi
