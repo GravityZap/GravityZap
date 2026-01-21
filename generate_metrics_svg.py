@@ -6,7 +6,10 @@ from collections import Counter
 
 # ---------- SVG (PREMIUM STYLE) ----------
 
-os.makedirs("svg", exist_ok=True)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SVG_PATH = os.path.join(BASE_DIR, "svg", "github-metrics.svg")
+
+os.makedirs(os.path.dirname(SVG_PATH), exist_ok=True)
 W, H = 780, 420
 dwg = svgwrite.Drawing(SVG_PATH, size=(W, H))
 
